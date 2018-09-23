@@ -1,0 +1,98 @@
+<p-toast></p-toast>
+
+<p-confirmDialog></p-confirmDialog>
+
+<p-dialog header="New Task" [(visible)]="display" [modal]="true" [responsive]="true" [width]="500" [minY]="70" [maximizable]="true"
+  [baseZIndex]="10000">
+  <h4>Summary</h4>
+  <div>
+    <input type="text" pInputText #summary/>
+  </div>
+  <h4>Due Date</h4>
+  <div>
+    <p-calendar #date></p-calendar>
+  </div>
+  <h4>Description</h4>
+  <div>
+    <textarea pInputTextarea [(ngModel)]="property" #desc></textarea>
+  </div>
+  <div>&nbsp;</div>
+  <p-footer>
+    <button type="button" pButton (click)="display=false; submitNewTask(summary, date, desc);" label="Submit"></button>
+    <button type="button" pButton (click)="display=false; cancelNewTask(summary, date, desc)" label="Cancel" class="ui-button-danger"></button>
+  </p-footer>
+</p-dialog>
+
+<p-dialog header="Edit task" [(visible)]="editMode" [modal]="true" [responsive]="true" [width]="500" [minY]="70" [maximizable]="true"
+  [baseZIndex]="10000">
+  <h4>Summary</h4>
+  <div>
+    <input type="text" pInputText [(ngModel)]="selected.summary" />
+  </div>
+  <h4>Due Date</h4>
+  <div>
+    <p-calendar [(ngModel)]="selected.date"></p-calendar>
+  </div>
+  <h4>Description</h4>
+  <div>
+    <textarea pInputTextarea [(ngModel)]="selected.description"></textarea>
+  </div>
+  <div>&nbsp;</div>
+  <p-footer>
+    <button type="button" pButton (click)="editMode=false; updateTask();" label="Submit"></button>
+    <button type="button" pButton (click)="editMode=false; cancelNewTask(summary, date, desc)" label="Cancel" class="ui-button-danger"></button>
+  </p-footer>
+</p-dialog>
+
+<div>&nbsp;</div>
+<div>&nbsp;</div>
+
+<div class="ui-g">
+  <div class="ui-g-6">
+    <button (click)="showDialog()" pButton label="New Task">
+    </button>
+  </div>
+  <div class="ui-g-6" style="text-align: right; font-family: 'Open sans'; font-size: 0.9em;">
+    <p-checkbox [ngModel]="showComplete" binary="true" (onChange)="toggleCompleted($event)"></p-checkbox>
+    Show completed tasks
+  </div>
+</div>
+
+<div class="ui-g">
+  <div class="ui-g-12">
+    <p-table [columns]="cols" [value]="tasks" [paginator]="true" [rows]="5">
+      <ng-template pTemplate="caption">
+        List of Tasks
+      </ng-template>
+      <ng-template pTemplate="header" let-columns>
+        <tr>
+          <th *ngFor="let col of columns" [pSortableColumn]="col.field === 'status' ? 'sortStatusBy' : col.field">
+            {{col.header}}
+            <p-sortIcon [field]="col.field"></p-sortIcon>
+          </th>
+          <th>Actions</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-rowData let-columns="columns">
+        <tr>
+          <td *ngFor="let col of columns">
+            <div [ngSwitch]="col.field">
+              <span *ngSwitchCase="'summary'">{{rowData[col.field]}}</span>
+              <span *ngSwitchCase="'date'">{{rowData[col.field]|date}}</span>
+              <span *ngSwitchCase="'status'">
+                <p-dropdown [options]="statuses" (onChange)="onChangeStatus($event, rowData)" [(ngModel)]="rowData.status" placeholder="Task Status"
+                  optionLabel="name"></p-dropdown>
+              </span>
+            </div>
+          </td>
+          <td>
+            <p-button icon="pi pi-pencil" class="ui-button-warning" (click)="onEdit(rowData)"></p-button>
+            <p-toggleButton (onChange)="onChange($event, rowData)" [ngModel]="rowData.status.code" onLabel="" offLabel="" onIcon="pi pi-check"
+              offIcon="pi pi-times"></p-toggleButton>
+            <button icon="pi pi-trash" (click)="delete(rowData)" pButton type="button" class="ui-button-danger"></button>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>
